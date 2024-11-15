@@ -2,9 +2,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  *  Parses OSM XML files using an XML SAX parser. Used to construct the graph of roads for
@@ -31,6 +29,7 @@ public class GraphBuildingHandler extends DefaultHandler {
      * possible. Note that in Berkeley, many of the campus roads are tagged as motor vehicle
      * roads, but in practice we walk all over them with such impunity that we forget cars can
      * actually drive on them.
+     *
      */
     private static final Set<String> ALLOWED_HIGHWAY_TYPES = new HashSet<>(Arrays.asList
             ("motorway", "trunk", "primary", "secondary", "tertiary", "unclassified",
@@ -38,6 +37,8 @@ public class GraphBuildingHandler extends DefaultHandler {
                     "secondary_link", "tertiary_link"));
     private String activeState = "";
     private final GraphDB g;
+    private List<Node> currentWayNodes = new ArrayList<>(); // 存储当前way的节点
+    private Map<String, String> currentWayTags = new HashMap<>(); // 存储当前way的属性
 
     /**
      * Create a new GraphBuildingHandler.
@@ -134,7 +135,49 @@ public class GraphBuildingHandler extends DefaultHandler {
             /* Hint1: If you have stored the possible connections for this way, here's your
             chance to actually connect the nodes together if the way is valid. */
 //            System.out.println("Finishing a way...");
+            // 我们完成了对way元素的处理
+
+            // 假设这里有一个方法可以连接节点
+            if (isValidWay()) {
+                connectNodes();
+            } else {
+                System.out.println("无效的way，无法连接节点。");
+            }
+
+            // 进行其他可能的结束处理，比如清理数据等
+            cleanUpAfterWay();
+
+            // 可以输出调试信息
+            System.out.println("完成一个way的处理...");
+        }
+        }
+    // 检查way是否有效的示例方法
+    private boolean isValidWay() {
+        // 假设way有效的条件是至少有一个节点
+        return !currentWayNodes.isEmpty();
+    }
+    // 连接节点的示例方法
+    private void connectNodes() {
+        // 实际的连接逻辑
+        for (int i = 0; i < currentWayNodes.size() - 1; i++) {
+            Node startNode = currentWayNodes.get(i);
+            Node endNode = currentWayNodes.get(i + 1);
+            // 实际连接逻辑，例如记录边
+            createEdge(startNode, endNode);
         }
     }
+    // 清理操作的示例方法
+    private void cleanUpAfterWay() {
+        // 清空当前way的节点和属性
+        currentWayNodes.clear();
+        currentWayTags.clear();
+    }
+    // 创建边的示例方法
+    private void createEdge(Node start, Node end) {
+        // 假设你有一个图结构存储边
+        // graph.addEdge(start, end);
+        System.out.println("创建边: " + start + " -> " + end);
+    }
+    }
 
-}
+
